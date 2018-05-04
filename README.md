@@ -1,2 +1,2 @@
-# pytools
+# pyuseful
 Useful functions.
