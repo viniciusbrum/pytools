@@ -44,7 +44,7 @@ def greatest_common_divisor(x, y):
 
 def is_working_day(date, holidays=None):
     """Checks whether a date is a working date."""
-    if date.weekday() > 4 or (holidays is not None and date in holidays):
+    if date.weekday() > 4 or (holidays and date in holidays):
         return False
 
     return True
@@ -65,6 +65,46 @@ def merge_list_dicts(list_dicts):
         new_dict = {**new_dict, **dictionary}
 
     return new_dict
+
+
+def next_working_day(from_date, days=1, holidays_list=None):
+    days = max(1, days)
+    delta = datetime.timedelta(days=1)
+    count = 0
+    tmp_date = from_date
+
+    if holidays_list:
+        holidays_list = [holiday
+                         for holiday in holidays_list
+                         if (holiday > from_date and holiday.weekday() < 5)]
+
+    while count < days:
+        tmp_date += delta
+
+        if is_working_day(tmp_date, holidays_list):
+            count += 1
+
+    return tmp_date
+
+
+def previous_working_day(from_date, days=-1, holidays_list=None):
+    days = min(-1, days)
+    delta = datetime.timedelta(days=1)
+    count = 0
+    tmp_date = from_date
+
+    if holidays_list:
+        holidays_list = [holiday
+                         for holiday in holidays_list
+                         if (holiday < from_date and holiday.weekday() < 5)]
+
+    while count > days:
+        tmp_date -= delta
+
+        if is_working_day(tmp_date, holidays_list):
+            count -= 1
+
+    return tmp_date
 
 
 def sorted_dict(dictionary, by_keys=False, reverse=False):
@@ -92,13 +132,21 @@ def square_root(x, precision):
 
 def working_days_between(from_date, to_date, holidays_list=None):
     """Returns the number of working days between two dates."""
-    days = 0
-    tmp_date = from_date + datetime.timedelta(days=1)
+    working_days = 0
+    holidays = 0
+    delta = datetime.timedelta(days=1)
+    tmp_date = from_date + delta
+
+    if holidays_list:
+        holidays = len([holiday
+                        for holiday in holidays_list
+                        if (tmp_date <= holiday <= to_date
+                            and holiday.weekday() < 5)])
 
     while tmp_date <= to_date:
-        if is_working_day(tmp_date, holidays_list):
-            days += 1
+        if is_working_day(tmp_date):
+            working_days += 1
 
-        tmp_date = tmp_date + datetime.timedelta(days=1)
+        tmp_date += delta
 
-    return days
+    return working_days - holidays
